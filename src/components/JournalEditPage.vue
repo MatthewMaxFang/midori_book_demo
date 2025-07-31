@@ -36,16 +36,15 @@
     <div class="edit-area">
       <div class="journal-canvas" :style="{ backgroundImage: `url(${currentTemplate.background})` }">
         <!-- 歌词文本显示区域 -->
-        <div class="lyrics-text" :style="currentTemplate.textStyle">
+        <!-- <div class="lyrics-text" :style="currentTemplate.textStyle">
           <div v-for="(lyric, index) in lyricsData" :key="index" class="lyric-line">
             {{ lyric.text }}
           </div>
-          <!-- 署名区域 -->
           <div class="signature">
             ——{{ songTitle }}<br>
             {{ artist }}
           </div>
-        </div>
+        </div> -->
 
         <!-- 装饰元素（玫瑰花图案等） -->
         <div class="decoration-elements">
@@ -60,13 +59,10 @@
       <div class="template-section">
         <!-- 其他模板选项 -->
         <div class="template-options">
-          <div 
-            class="template-item template-option ai-template-item" 
+          <div class="template-item template-option ai-template-item"
             :class="{ 'has-generated': hasAIGenerated, 'active': currentTemplateIndex === -1 }"
-            @click="handleAITemplateClick"
-            @mouseenter="showRegenerateBtn = true"
-            @mouseleave="showRegenerateBtn = false"
-          >
+            @click="handleAITemplateClick" @mouseenter="showRegenerateBtn = true"
+            @mouseleave="showRegenerateBtn = false">
             <!-- 未生成时显示AI图标和文字 -->
             <template v-if="!hasAIGenerated">
               <div class="template-icon">AI</div>
@@ -82,7 +78,8 @@
             </template>
           </div>
           <div v-for="(template, index) in templates" :key="index" class="template-option"
-            :class="{ active: currentTemplateIndex === index && currentTemplateIndex !== -1 }" @click="selectTemplate(index)">
+            :class="{ active: currentTemplateIndex === index && currentTemplateIndex !== -1 }"
+            @click="selectTemplate(index)">
             <img :src="template.thumbnail" :alt="template.name" class="template-thumbnail">
           </div>
         </div>
@@ -127,12 +124,7 @@
         <div class="modal-content">
           <div class="prompt-section">
             <label>提示词</label>
-            <textarea 
-              v-model="aiPrompt" 
-              class="prompt-input"
-              placeholder="请输入生成描述..."
-              rows="4"
-            ></textarea>
+            <textarea v-model="aiPrompt" class="prompt-input" placeholder="请输入生成描述..." rows="4"></textarea>
           </div>
           <button class="generate-btn" @click="generateAITemplate">一键AI生成</button>
         </div>
@@ -178,8 +170,8 @@ export default {
       templates: [
         {
           name: '通用模板',
-          background: '/src/assets/midori/cover_common.jpg',
-          thumbnail: '/src/assets/midori/cover_common.jpg',
+          background: '/src/assets/midori/cover_5.png',
+          thumbnail: '/src/assets/midori/cover_5.png',
           textStyle: {
             position: 'absolute',
             top: '20%',
@@ -365,7 +357,7 @@ export default {
           textAlign: 'left'
         }
       }
-      
+
       // 直接将AI模板设置为当前模板，不添加到templates数组
       this.currentAITemplate = aiTemplate
       // 设置一个特殊的索引值来标识当前使用的是AI模板
@@ -387,7 +379,7 @@ export default {
       this.showAIModal = false
       // 显示生成中动画
       this.showGeneratingModal = true
-      
+
       // 模拟5秒生成时间
       setTimeout(() => {
         this.showGeneratingModal = false
@@ -550,7 +542,7 @@ export default {
 
 .journal-canvas {
   width: 360px;
-  height: 460px;
+  min-height: 520px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -656,8 +648,13 @@ export default {
 }
 
 @keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .template-options {
@@ -853,8 +850,13 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .generating-modal h3 {
@@ -877,7 +879,6 @@ export default {
 @media (max-width: 480px) {
   .journal-canvas {
     width: 360px;
-    height: 460px;
   }
 
   .edit-area {
