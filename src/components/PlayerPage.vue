@@ -341,7 +341,8 @@ export default {
         artist: '孙燕姿',
         mood: finalMoodText,
         collectedAt: new Date().toLocaleDateString('zh-CN'),
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        currIdx: 0
       }
 
       // 存储到本地存储

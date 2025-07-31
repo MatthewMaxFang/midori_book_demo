@@ -48,7 +48,7 @@
             <div class="card-front">
               <div class="poster-background">
                 <img 
-                  :src="getPosterImage(index)" 
+                  :src=this.cover.cover[record.currIdx]
                   :alt="record.songTitle"
                   class="poster-image"
                 />
@@ -93,82 +93,24 @@
         </div>
       </div>
     </div>
-
-    <!-- 底部Tab栏 -->
-    <div class="bottom-tabs">
-      <div class="tab-item" @click="goToJournalZone">
-        <div class="tab-icon">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <span class="tab-label">手帐专区</span>
-      </div>
-      <div class="tab-item active">
-        <div class="tab-icon">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <span class="tab-label">我的</span>
-      </div>
-    </div>
   </div>
 </template>
 
 <script>
+import cover from '../assets/img'
 export default {
   name: 'LyricBookPage',
   data() {
     return {
-      moodRecords: [
-        {
-          id: 1640000000000,
-          lyrics: [
-            { index: 2, text: '我怀念的是无话不说' },
-            { index: 3, text: '我怀念的是一起作梦' }
-          ],
-          songTitle: '我怀念的',
-          artist: '孙燕姿',
-          mood: '听到这句歌词的时候，突然想起了大学时代的室友，那种无话不说的感觉真的很珍贵。现在各自忙碌，很久没有深入交流了。',
-          collectedAt: '2024-01-15',
-          timestamp: 1640000000000
-        },
-        {
-          id: 1640100000000,
-          lyrics: [
-            { index: 4, text: '我怀念的是争吵以后' },
-            { index: 5, text: '还是想要爱你的冲动' }
-          ],
-          songTitle: '我怀念的',
-          artist: '孙燕姿',
-          mood: '这就是爱情最真实的模样吧，即使吵架了，还是舍不得对方。想起和他的那些争吵，现在回想起来都是甜蜜的回忆。',
-          collectedAt: '2024-01-20',
-          timestamp: 1640100000000
-        },
-        {
-          id: 1640200000000,
-          lyrics: [
-            { index: 6, text: '我记得那年生日' },
-            { index: 7, text: '也记得那一首歌' },
-            { index: 8, text: '记得那片星空' }
-          ],
-          songTitle: '我怀念的',
-          artist: '孙燕姿',
-          mood: '今天是妈妈的生日，这首歌让我想起小时候和她一起看星空的夜晚。那时候的我们都还年轻，时间过得真快。',
-          collectedAt: '2024-01-25',
-          timestamp: 1640200000000
-        }
-      ],
+      moodRecords: [],
       flippedCards: [], // 记录已翻转的卡片ID
-      clickTimeout: null // 用于区分单击和双击
+      clickTimeout: null, // 用于区分单击和双击
+      cover: cover,
     }
   },
   mounted() {
     this.loadMoodRecords()
+    console.warn(cover)
   },
   methods: {
     loadMoodRecords() {
@@ -200,13 +142,10 @@ export default {
     goToPlayer() {
       this.$router.push('/player')
     },
-
-    goToJournalZone() {
-      this.$router.push('/journal-zone')
-    },
     
     handleCardClick(record) {
       // 单击处理，延迟执行以检测是否为双击
+      console.log(record)
       if (this.clickTimeout) {
         clearTimeout(this.clickTimeout)
         this.clickTimeout = null
