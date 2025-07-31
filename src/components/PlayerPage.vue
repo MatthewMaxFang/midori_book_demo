@@ -71,8 +71,7 @@
           'commented': commentedLyrics.includes(index),
           'collected': collectedLyrics.includes(index)
         }"
-        @dblclick="handleLyricDoubleClick($event, index)"
-        @click="handleLyricClick(index)"
+        @click="handleLyricClick(index, $event)"
       >
         {{ lyric.text }}
       </div>
@@ -208,6 +207,11 @@ export default {
       moodText: '', // 心情文本
       touchStartTime: 0,
       isPlaying: false,
+      // 双击检测相关
+      lastClickTime: 0,
+      lastClickIndex: -1,
+      clickTimeout: null,
+      doubleClickDelay: 200, // 双击检测延时（毫秒）
       lyrics: [
         { text: '真相太赤裸裸', time: '00:15' },
         { text: '狼狈比失去难受', time: '00:25' },
@@ -236,7 +240,7 @@ export default {
   },
   methods: {
     goBack() {
-      this.$router.go(-1)
+      this.$router.push('/profile')
     },
 
     togglePlay() {
@@ -244,7 +248,7 @@ export default {
     },
 
     handleLyricDoubleClick(event, index) {
-      // 防止双击缩放
+      // 防止双击缩放和事件冒泡
       event.preventDefault()
       event.stopPropagation()
       
@@ -254,10 +258,43 @@ export default {
       }
     },
 
-    handleLyricClick(index) {
-      // 在选择模式下，单击选择或取消选择歌词
+    handleLyricClick(index, event) {
+      const currentTime = Date.now()
+      
+      // 防止事件冒泡
+      event.preventDefault()
+      event.stopPropagation()
+      
+      // 如果已经在选择模式，立即响应单击
       if (this.isSelectionMode) {
         this.toggleLyricSelection(index)
+        return
+      }
+      
+      // 检测双击
+      if (this.lastClickIndex === index && 
+          currentTime - this.lastClickTime < this.doubleClickDelay) {
+        // 这是一个双击事件，立即进入选择模式
+        this.clearClickTimeout()
+        this.enterSelectionMode(index)
+        return
+      }
+      
+      // 清除之前的单击延时
+      this.clearClickTimeout()
+      
+      // 记录当前点击
+      this.lastClickTime = currentTime
+      this.lastClickIndex = index
+      
+      // 对于非选择模式的单击，不设置延时，直接忽略
+      // 用户需要双击来进入选择模式
+    },
+
+    clearClickTimeout() {
+      if (this.clickTimeout) {
+        clearTimeout(this.clickTimeout)
+        this.clickTimeout = null
       }
     },
 
@@ -272,8 +309,11 @@ export default {
     },
 
     toggleLyricSelection(index) {
-      if (this.selectedLyrics.includes(index)) {
-        this.selectedLyrics = this.selectedLyrics.filter(i => i !== index)
+      const selectedIndex = this.selectedLyrics.indexOf(index)
+      
+      if (selectedIndex > -1) {
+        // 使用splice而不是filter，性能更好
+        this.selectedLyrics.splice(selectedIndex, 1)
       } else {
         this.selectedLyrics.push(index)
       }
@@ -372,6 +412,11 @@ export default {
         }
       })
     }
+  },
+  
+  beforeUnmount() {
+    // 清理定时器，防止内存泄漏
+    this.clearClickTimeout()
   }
 }
 </script>
@@ -678,8 +723,8 @@ export default {
   margin-bottom: 15px;
   color: #bbb;
   cursor: pointer;
-  padding: 8px 0;
-  transition: all 0.3s ease;
+  padding: 12px 8px;
+  transition: background-color 0.15s ease, color 0.15s ease;
   user-select: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -688,7 +733,24 @@ export default {
   border-radius: 6px;
   touch-action: manipulation;
   -webkit-touch-callout: none;
+  /* 增加触摸目标大小，提高点击准确性 */
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  /* 防止双击缩放 */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* 使用GPU加速 */
+  will-change: background-color, color;
+  transform: translateZ(0);
 }
+
+/* 移除可能导致卡顿的active状态动画 */
 
 .lyric-line.current {
   color: #333;
@@ -704,6 +766,9 @@ export default {
   width: 100%;
   border-radius: 6px;
   position: relative;
+  /* 使用GPU加速，避免重复的transition */
+  will-change: background-color, color;
+  transform: translateZ(0);
 }
 
 .lyric-line.selected::before {
@@ -711,11 +776,13 @@ export default {
   position: absolute;
   right: 12px;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(-50%) translateZ(0);
   color: white;
   font-size: 16px;
   font-weight: bold;
   z-index: 10;
+  /* 使用GPU加速 */
+  will-change: transform;
 }
 
 .lyric-line.commented {
