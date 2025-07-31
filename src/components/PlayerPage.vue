@@ -120,7 +120,7 @@
             <h3>发表评论</h3>
             <button @click="showCommentInput = false" class="close-popup">×</button>
           </div>
-          
+
           <div class="quoted-lyrics-section">
             <div class="quote-label">引用歌词：</div>
             <div class="quoted-lyrics">
@@ -131,15 +131,10 @@
           </div>
 
           <div class="comment-form">
-            <textarea
-              v-model="commentText"
-              placeholder="分享你的感受..."
-              rows="4"
-              maxlength="200"
-              class="comment-textarea"
-            ></textarea>
+            <textarea v-model="commentText" placeholder="分享你的感受..." rows="4" maxlength="200"
+              class="comment-textarea"></textarea>
             <div class="word-count">{{ commentText.length }}/200</div>
-            
+
             <div class="comment-actions">
               <button @click="showCommentInput = false" class="cancel-btn">取消</button>
               <button @click="submitComment" :disabled="!commentText.trim()" class="submit-btn">发布评论</button>
@@ -157,7 +152,7 @@
             <h3>收藏歌词</h3>
             <button @click="showMoodInput = false" class="close-popup">×</button>
           </div>
-          
+
           <div class="quoted-lyrics-section">
             <div class="quote-label">选中的歌词：</div>
             <div class="quoted-lyrics">
@@ -169,15 +164,10 @@
 
           <div class="mood-form">
             <div class="mood-hint">这一刻，你想到了什么？</div>
-            <textarea
-              v-model="moodText"
-              placeholder="记录被触动的瞬间..."
-              rows="4"
-              maxlength="200"
-              class="mood-textarea"
-            ></textarea>
+            <textarea v-model="moodText" placeholder="记录被触动的瞬间..." rows="4" maxlength="200"
+              class="mood-textarea"></textarea>
             <div class="word-count">{{ moodText.length }}/200</div>
-            
+
             <div class="mood-actions">
               <button @click="showMoodInput = false" class="cancel-btn">取消</button>
               <button @click="submitMoodRecord" class="collect-btn">确认收藏</button>
@@ -190,7 +180,6 @@
 </template>
 
 <script>
-import { Toast } from 'vant'
 
 export default {
   name: 'PlayerPage',
@@ -232,7 +221,7 @@ export default {
       const sortedIndices = [...this.selectedLyrics].sort((a, b) => a - b)
       return sortedIndices.map(index => this.lyrics[index].text).join('\n')
     },
-    
+
     sortedSelectedLyrics() {
       // 返回按原本顺序排列的选中歌词索引
       return [...this.selectedLyrics].sort((a, b) => a - b)
@@ -251,7 +240,7 @@ export default {
       // 防止双击缩放和事件冒泡
       event.preventDefault()
       event.stopPropagation()
-      
+
       // 双击进入选择模式并选中该歌词
       if (!this.isSelectionMode) {
         this.enterSelectionMode(index)
@@ -334,10 +323,15 @@ export default {
       // 如果用户没有输入心情，使用歌曲名+歌手名作为默认值
       const defaultMood = '我怀念的 - 孙燕姿'
       const finalMoodText = this.moodText.trim() || defaultMood
-      
-      // 创建心情记录
+  
+      // 准备歌词数据（使用排序后的歌词顺序）
       const sortedIndices = [...this.selectedLyrics].sort((a, b) => a - b)
-      const moodRecord = {
+      const lyricsData = sortedIndices.map(index => ({
+        index,
+        text: this.lyrics[index].text
+      }))
+
+       const moodRecord = {
         id: Date.now(),
         lyrics: sortedIndices.map(index => ({
           index,
@@ -361,14 +355,21 @@ export default {
           this.collectedLyrics.push(index)
         }
       })
-      
+
       this.showMoodInput = false
       this.exitSelectionMode()
-      
-      // 跳转到歌词手帐页面
-      this.$router.push('/lyricbook')
+
+      // 跳转到手帐编辑页面
+      this.$router.push({
+        path: '/journal-edit',
+        query: {
+          lyrics: JSON.stringify(lyricsData),
+          songTitle: '我怀念的',
+          artist: '孙燕姿'
+        }
+      })
     },
-    
+
     openCommentInput() {
       this.showCommentInput = true
       this.commentText = ''
@@ -404,7 +405,7 @@ export default {
       // 跳转到评论页面
       this.$router.push({
         path: '/comment',
-        query: { 
+        query: {
           lyrics: JSON.stringify(commentData.lyrics),
           songTitle: commentData.songTitle,
           artist: commentData.artist,
@@ -462,10 +463,21 @@ export default {
   border-radius: 1px;
 }
 
-.signal-bar:nth-child(1) { height: 3px; }
-.signal-bar:nth-child(2) { height: 5px; }
-.signal-bar:nth-child(3) { height: 7px; }
-.signal-bar:nth-child(4) { height: 9px; }
+.signal-bar:nth-child(1) {
+  height: 3px;
+}
+
+.signal-bar:nth-child(2) {
+  height: 5px;
+}
+
+.signal-bar:nth-child(3) {
+  height: 7px;
+}
+
+.signal-bar:nth-child(4) {
+  height: 9px;
+}
 
 /* 电池图标 */
 .battery-icon {
@@ -654,7 +666,8 @@ export default {
   gap: 15px;
 }
 
-.like-btn, .share-btn {
+.like-btn,
+.share-btn {
   background: none;
   border: none;
   font-size: 14px;
@@ -813,12 +826,10 @@ export default {
   left: -5px;
   width: calc(100% + 10px);
   height: 3px;
-  background: linear-gradient(
-    to right,
-    rgba(102, 102, 102, 0.7) 0%,
-    rgba(102, 102, 102, 0.5) 70%,
-    transparent 100%
-  );
+  background: linear-gradient(to right,
+      rgba(102, 102, 102, 0.7) 0%,
+      rgba(102, 102, 102, 0.5) 70%,
+      transparent 100%);
   border-radius: 50px;
   transform: rotate(-0.8deg);
   transform-origin: center;
@@ -836,12 +847,10 @@ export default {
   left: -5px;
   width: calc(100% + 10px);
   height: 3px;
-  background: linear-gradient(
-    to right,
-    rgba(136, 136, 136, 0.6) 0%,
-    rgba(136, 136, 136, 0.4) 70%,
-    transparent 100%
-  );
+  background: linear-gradient(to right,
+      rgba(136, 136, 136, 0.6) 0%,
+      rgba(136, 136, 136, 0.4) 70%,
+      transparent 100%);
   border-radius: 50px;
   transform: rotate(0.6deg);
   transform-origin: center;
@@ -1012,7 +1021,8 @@ export default {
 
 
 /* 评论弹窗 */
-.comment-overlay, .mood-overlay {
+.comment-overlay,
+.mood-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -1027,7 +1037,8 @@ export default {
   padding: 20px;
 }
 
-.comment-popup, .mood-popup {
+.comment-popup,
+.mood-popup {
   background: #faf8f5;
   border-radius: 20px;
   padding: 24px;
@@ -1112,7 +1123,8 @@ export default {
   margin-bottom: 0;
 }
 
-.comment-form, .mood-form {
+.comment-form,
+.mood-form {
   display: flex;
   flex-direction: column;
 }
@@ -1127,7 +1139,8 @@ export default {
   opacity: 0.9;
 }
 
-.comment-textarea, .mood-textarea {
+.comment-textarea,
+.mood-textarea {
   width: 100%;
   padding: 16px;
   border: 1px solid rgba(0, 0, 0, 0.08);
@@ -1147,7 +1160,8 @@ export default {
   background: rgba(255, 255, 255, 0.95);
 }
 
-.comment-textarea:focus, .mood-textarea:focus {
+.comment-textarea:focus,
+.mood-textarea:focus {
   border-color: #d4b896;
   box-shadow: 0 0 0 3px rgba(212, 184, 150, 0.2);
 }
@@ -1159,12 +1173,15 @@ export default {
   margin: 8px 0 20px;
 }
 
-.comment-actions, .mood-actions {
+.comment-actions,
+.mood-actions {
   display: flex;
   gap: 12px;
 }
 
-.cancel-btn, .submit-btn, .collect-btn {
+.cancel-btn,
+.submit-btn,
+.collect-btn {
   flex: 1;
   padding: 14px 20px;
   border-radius: 20px;
@@ -1184,7 +1201,8 @@ export default {
   background: rgba(0, 0, 0, 0.1);
 }
 
-.submit-btn, .collect-btn {
+.submit-btn,
+.collect-btn {
   background: linear-gradient(135deg, #d4b896 0%, #c7a882 100%);
   color: white;
   box-shadow: 0 4px 12px rgba(212, 184, 150, 0.3);
@@ -1195,7 +1213,8 @@ export default {
   box-shadow: 0 4px 12px rgba(199, 168, 130, 0.4);
 }
 
-.submit-btn:hover, .collect-btn:hover {
+.submit-btn:hover,
+.collect-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(212, 184, 150, 0.4);
 }
@@ -1204,7 +1223,8 @@ export default {
   box-shadow: 0 6px 16px rgba(199, 168, 130, 0.5);
 }
 
-.submit-btn:disabled, .collect-btn:disabled {
+.submit-btn:disabled,
+.collect-btn:disabled {
   background: #ccc;
   cursor: not-allowed;
   transform: none;
@@ -1263,25 +1283,34 @@ export default {
 }
 
 /* 动画效果 */
-.fade-up-enter-active, .fade-up-leave-active {
+.fade-up-enter-active,
+.fade-up-leave-active {
   transition: all 0.3s ease;
 }
-.fade-up-enter-from, .fade-up-leave-to {
+
+.fade-up-enter-from,
+.fade-up-leave-to {
   opacity: 0;
   transform: translateY(20px);
 }
 
-.slide-up-enter-active, .slide-up-leave-active {
+.slide-up-enter-active,
+.slide-up-leave-active {
   transition: transform 0.3s ease;
 }
-.slide-up-enter-from, .slide-up-leave-to {
+
+.slide-up-enter-from,
+.slide-up-leave-to {
   transform: translateY(100%);
 }
 
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.3s;
 }
-.fade-enter-from, .fade-leave-to {
+
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
 </style>

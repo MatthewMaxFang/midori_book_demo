@@ -9,6 +9,7 @@ import CommentPage from './components/CommentPage.vue'
 import LyricBookPage from './components/LyricBookPage.vue'
 import JournalDetailPage from './components/JournalDetailPage.vue'
 import JournalZonePage from './components/JournalZonePage.vue'
+import JournalEditPage from './components/JournalEditPage.vue'
 import ProfilePage from './components/ProfilePage.vue'
 
 const routes = [
@@ -18,7 +19,8 @@ const routes = [
   { path: '/comment', component: CommentPage },
   { path: '/lyricbook', component: LyricBookPage },
   { path: '/journal-detail', component: JournalDetailPage },
-  { path: '/journal-zone', component: JournalZonePage }
+  { path: '/journal-zone', component: JournalZonePage },
+  { path: '/journal-edit', component: JournalEditPage }
 ]
 
 const router = createRouter({
