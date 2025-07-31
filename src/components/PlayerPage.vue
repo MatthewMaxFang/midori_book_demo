@@ -170,7 +170,7 @@
 
             <div class="mood-actions">
               <button @click="showMoodInput = false" class="cancel-btn">取消</button>
-              <button @click="submitMoodRecord" class="collect-btn">确认收藏</button>
+              <button @click="submitMoodRecord" class="collect-btn">确认摘抄</button>
             </div>
           </div>
         </div>
