@@ -233,6 +233,22 @@ export default {
             textAlign: 'justify'
           }
         },
+        {
+          name: '黄子弘凡',
+          background: '/src/assets/midori/cover_4.png',
+          thumbnail: '/src/assets/midori/cover_4.png',
+          textStyle: {
+            position: 'absolute',
+            top: '30%',
+            left: '12%',
+            right: '12%',
+            fontSize: '15px',
+            lineHeight: '1.7',
+            color: '#34495E',
+            fontFamily: '宋体, SimSun, serif',
+            textAlign: 'justify'
+          }
+        }
       ]
     }
   },
