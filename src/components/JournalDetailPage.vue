@@ -25,7 +25,7 @@
       <button class="nav-back-btn" @click="goBack">
         <img src="../assets/back_arrow.svg" alt="返回" class="back-icon" />
       </button>
-      <h1 class="nav-title">手帐详情</h1>
+      <h1 class="nav-title">{{ isOthersJournal ? '手帐详情' : '手帐详情' }}</h1>
       <div class="nav-placeholder"></div>
     </div>
 
@@ -382,22 +382,64 @@
 
     <!-- 底部操作按钮 -->
     <div class="bottom-actions" v-if="!isEditMode">
-      <button class="modern-btn secondary" @click="reExtract">
-        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
-          <path d="M21 3v5h-5"/>
-          <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
-          <path d="M3 21v-5h5"/>
-        </svg>
-        <span>重新摘抄</span>
-      </button>
-      <button class="modern-btn primary" @click="enterEditMode">
-        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 20h9"/>
-          <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
-        </svg>
-        <span>编辑海报</span>
-      </button>
+      <!-- 其他用户的手帐 - 显示作者信息和点赞按钮 -->
+      <div v-if="isOthersJournal" class="others-journal-actions">
+        <div class="author-section">
+          <div class="author-info">
+            <div class="author-avatar">
+              <img :src="authorAvatar" :alt="authorName" />
+            </div>
+            <div class="author-details">
+              <div class="author-name">{{ authorName }}</div>
+              <div class="publish-time">{{ journalData?.createdAt || journalData?.collectedAt }}</div>
+            </div>
+          </div>
+          <div class="journal-stats">
+            <span class="stat-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              {{ viewCount }}
+            </span>
+            <span class="stat-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              {{ likeCount }}
+            </span>
+          </div>
+        </div>
+        <button 
+          class="like-fab" 
+          :class="{ liked: isLiked }"
+          @click="toggleLike"
+        >
+          <svg viewBox="0 0 24 24" :fill="isLiked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- 自己的手帐 - 显示编辑按钮 -->
+      <div v-else class="my-journal-actions">
+        <button class="modern-btn secondary" @click="reExtract">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+            <path d="M21 3v5h-5"/>
+            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+            <path d="M3 21v-5h5"/>
+          </svg>
+          <span>重新摘抄</span>
+        </button>
+        <button class="modern-btn primary" @click="enterEditMode">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+          </svg>
+          <span>编辑海报</span>
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -410,6 +452,14 @@ export default {
       recordId: null,
       journalData: null,
       isEditMode: false,
+      
+      // 其他用户手帐相关
+      isOthersJournal: false,
+      authorName: '',
+      authorAvatar: '',
+      likeCount: 0,
+      viewCount: 0,
+      isLiked: false,
       
       // 编辑相关数据
       editData: null,
@@ -523,6 +573,10 @@ export default {
   
   mounted() {
     this.recordId = this.$route.query.id
+    this.isOthersJournal = this.$route.query.isOthers === 'true'
+    this.authorName = this.$route.query.author || ''
+    this.authorAvatar = this.$route.query.authorAvatar || ''
+    
     this.loadJournalData()
     
     // 确保示例数据也在localStorage中（如果不存在的话）
@@ -545,23 +599,129 @@ export default {
   
   methods: {
     loadJournalData() {
-      if (this.recordId) {
-        // 从localStorage加载数据
+      if (this.isOthersJournal) {
+        // 处理其他用户的手帐数据
+        this.loadOthersJournalData()
+      } else if (this.recordId) {
+        // 从localStorage加载自己的数据
         const records = JSON.parse(localStorage.getItem('lyricMoodRecords') || '[]')
         this.journalData = records.find(r => r.id == this.recordId)
-        
-              // 加载手帐数据
         
         // 如果没找到，使用示例数据
         if (!this.journalData) {
           this.journalData = this.sampleData
-          // 使用示例数据
         }
       } else {
         // 使用示例数据
         this.journalData = this.sampleData
-        // 没有recordId，使用示例数据
       }
+    },
+
+    // 加载其他用户的手帐数据
+    loadOthersJournalData() {
+      // 模拟其他用户的手帐数据
+      const othersJournalData = {
+        zone_1: {
+          id: 'zone_1',
+          songTitle: '青春回忆录',
+          artist: '音乐少女小雨',
+          lyrics: [
+            { index: 1, text: '青春是一首永不落幕的歌' },
+            { index: 2, text: '每一个音符都是美好的回忆' }
+          ],
+          mood: '收录了我青春时期最喜欢的歌曲片段，每一句歌词都承载着那些美好的回忆。',
+          collectedAt: '2024-01-20',
+          createdAt: '2024-01-20',
+          timestamp: Date.now() - 86400000 * 5
+        },
+        zone_2: {
+          id: 'zone_2',
+          songTitle: '夜空中最亮的星',
+          artist: '逃跑计划',
+          lyrics: [
+            { index: 1, text: '夜空中最亮的星' },
+            { index: 2, text: '能否听清' },
+            { index: 3, text: '那仰望的人心底的孤独和叹息' }
+          ],
+          mood: '每当迷茫的时候，这首歌总能给我力量，就像夜空中最亮的那颗星。',
+          collectedAt: '2024-01-18',
+          createdAt: '2024-01-18',
+          timestamp: Date.now() - 86400000 * 7
+        },
+        zone_3: {
+          id: 'zone_3',
+          songTitle: '时光倒流',
+          artist: '怀旧音乐人',
+          lyrics: [
+            { index: 1, text: '如果时光能够倒流' },
+            { index: 2, text: '我想回到那个夏天' }
+          ],
+          mood: '如果时光能够倒流，我想回到那个夏天，回到我们一起听歌的日子。',
+          collectedAt: '2024-01-15',
+          createdAt: '2024-01-15',
+          timestamp: Date.now() - 86400000 * 10
+        },
+        zone_4: {
+          id: 'zone_4',
+          songTitle: '情感日记',
+          artist: '文艺青年阿明',
+          lyrics: [
+            { index: 1, text: '用音乐记录生活' },
+            { index: 2, text: '每一首歌都是一段故事' }
+          ],
+          mood: '用音乐记录生活中的点点滴滴，每一首歌都是一段故事。',
+          collectedAt: '2024-01-12',
+          createdAt: '2024-01-12',
+          timestamp: Date.now() - 86400000 * 13
+        },
+        zone_5: {
+          id: 'zone_5',
+          songTitle: '雨天的思念',
+          artist: '雨中漫步',
+          lyrics: [
+            { index: 1, text: '雨天总是容易让人想起过去' },
+            { index: 2, text: '这首歌陪伴我度过了许多个雨夜' }
+          ],
+          mood: '雨天总是容易让人想起过去，这首歌陪伴我度过了许多个雨夜。',
+          collectedAt: '2024-01-10',
+          createdAt: '2024-01-10',
+          timestamp: Date.now() - 86400000 * 15
+        },
+        zone_6: {
+          id: 'zone_6',
+          songTitle: '梦想的翅膀',
+          artist: '追梦人小李',
+          lyrics: [
+            { index: 1, text: '每个人都有梦想' },
+            { index: 2, text: '只要坚持就能飞翔' }
+          ],
+          mood: '每个人都有梦想，这首歌让我相信，只要坚持就能飞翔。',
+          collectedAt: '2024-01-08',
+          createdAt: '2024-01-08',
+          timestamp: Date.now() - 86400000 * 17
+        }
+      }
+
+      // 根据recordId获取对应的数据
+      this.journalData = othersJournalData[this.recordId] || othersJournalData.zone_1
+
+      // 设置点赞和浏览数据
+      const statsData = {
+        zone_1: { likes: 128, views: 456, isLiked: false },
+        zone_2: { likes: 89, views: 234, isLiked: false },
+        zone_3: { likes: 156, views: 389, isLiked: false },
+        zone_4: { likes: 203, views: 567, isLiked: false },
+        zone_5: { likes: 67, views: 178, isLiked: false },
+        zone_6: { likes: 94, views: 267, isLiked: false }
+      }
+
+      const stats = statsData[this.recordId] || statsData.zone_1
+      this.likeCount = stats.likes
+      this.viewCount = stats.views
+      this.isLiked = stats.isLiked
+
+      // 增加浏览量
+      this.viewCount += 1
     },
 
     // 确保示例数据在localStorage中（但不覆盖已有数据）
@@ -647,6 +807,21 @@ export default {
     reExtract() {
       // TODO: 实现重新摘抄功能
       alert('重新摘抄功能开发中...')
+    },
+    
+    // 点赞功能
+    toggleLike() {
+      this.isLiked = !this.isLiked
+      if (this.isLiked) {
+        this.likeCount++
+        this.showToast('已点赞')
+      } else {
+        this.likeCount--
+        this.showToast('已取消点赞')
+      }
+      
+      // TODO: 在实际应用中，这里应该调用API更新点赞状态
+      console.log('点赞状态:', this.isLiked, '点赞数:', this.likeCount)
     },
     
     enterEditMode() {
