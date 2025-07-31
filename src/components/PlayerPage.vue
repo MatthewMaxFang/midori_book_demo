@@ -181,7 +181,7 @@
             
             <div class="mood-actions">
               <button @click="showMoodInput = false" class="cancel-btn">取消</button>
-              <button @click="submitMoodRecord" :disabled="!moodText.trim()" class="collect-btn">确认收藏</button>
+              <button @click="submitMoodRecord" class="collect-btn">确认收藏</button>
             </div>
           </div>
         </div>
@@ -291,6 +291,10 @@ export default {
     },
 
     submitMoodRecord() {
+      // 如果用户没有输入心情，使用歌曲名+歌手名作为默认值
+      const defaultMood = '我怀念的 - 孙燕姿'
+      const finalMoodText = this.moodText.trim() || defaultMood
+      
       // 创建心情记录
       const sortedIndices = [...this.selectedLyrics].sort((a, b) => a - b)
       const moodRecord = {
@@ -301,7 +305,7 @@ export default {
         })),
         songTitle: '我怀念的',
         artist: '孙燕姿',
-        mood: this.moodText,
+        mood: finalMoodText,
         collectedAt: new Date().toLocaleDateString('zh-CN'),
         timestamp: Date.now()
       }
