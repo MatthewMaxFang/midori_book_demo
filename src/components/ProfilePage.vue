@@ -145,7 +145,7 @@
     </div>
 
     <!-- 统计数据 -->
-    <div class="flex justify-between gap-3 mt-4 px-5">
+    <div class="flex justify-between gap-3 mt-6 px-5">
       <div class="flex flex-col items-center flex-1">
         <div class="w-6 h-6 flex items-center justify-center mb-2">
           <svg viewBox="0 0 1025 1024" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
@@ -193,19 +193,19 @@
         <div class="text-xs text-gray-500 cursor-pointer">></div>
       </div>
       <div class="flex gap-3 overflow-x-auto">
-        <div class="min-w-20 text-center">
+        <div class="w-[25%] text-center flex flex-col items-center">
           <img src="../assets/cover.jpg" alt="song" class="w-16 h-16 rounded-lg mb-2" />
           <div class="text-xs text-gray-600 line-clamp-2">已播歌曲 873</div>
         </div>
-        <div class="min-w-20 text-center">
+        <div class="w-[25%] text-center flex flex-col items-center">
           <img src="../assets/avatars/avatar_3.jpg" alt="song" class="w-16 h-16 rounded-lg mb-2" />
           <div class="text-xs text-gray-600 line-clamp-2">在月球里想念春天</div>
         </div>
-        <div class="min-w-20 text-center">
+        <div class="w-[25%] text-center flex flex-col items-center">
           <img src="../assets/avatars/avatar_4.jpg" alt="song" class="w-16 h-16 rounded-lg mb-2" />
           <div class="text-xs text-gray-600 line-clamp-2">华语精选｜那...</div>
         </div>
-        <div class="min-w-20 text-center">
+        <div class="w-[25%] text-center flex flex-col items-center">
           <img src="../assets/avatars/avatar_5.jpg" alt="song" class="w-16 h-16 rounded-lg mb-2" />
           <div class="text-xs text-gray-600 line-clamp-2">【国语】日...</div>
         </div>
@@ -213,7 +213,7 @@
     </div>
 
     <!-- 歌单区域 -->
-    <div class="bg-white mx-5 mt-5 rounded-xl shadow-md">
+    <div class="bg-white mx-5 mt-5 mb-[160px] rounded-xl shadow-md">
       <div class="flex items-center justify-between p-4 border-b border-gray-200">
         <div class="flex items-center gap-6">
           <div class="flex items-center gap-2">
