@@ -311,13 +311,14 @@ export default {
         artist: this.artist,
         template: this.currentTemplate,
         createdAt: new Date().toLocaleDateString('zh-CN'),
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        currIdx: this.currentTemplateIndex
       }
 
       // 保存到本地存储
-      const existingJournals = JSON.parse(localStorage.getItem('savedJournals') || '[]')
+      const existingJournals = JSON.parse(localStorage.getItem('lyricMoodRecords') || '[]')
       existingJournals.unshift(journalData)
-      localStorage.setItem('savedJournals', JSON.stringify(existingJournals))
+      localStorage.setItem('lyricMoodRecords', JSON.stringify(existingJournals))
 
       // 跳转到手帐列表页面
       this.$router.push('/lyricbook')

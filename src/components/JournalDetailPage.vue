@@ -61,7 +61,7 @@
             />
             <img 
               v-if="!journalData.editedPosterPath"
-              src="../assets/image.png"
+              :src=this.cover[this.currIdx]
               class="poster-image"
               :style="{
                 transform: `scale(${detailPosterScale || 1}) translate(${detailPosterOffsetX || 0}px, ${detailPosterOffsetY || 0}px)`,
@@ -457,6 +457,7 @@ export default {
       isLiked: false,
       isScreen: false,
       currIdx:0,
+      cover:cover.cover,
       // 编辑相关数据
       editData: null,
       editElements: [],
@@ -608,7 +609,7 @@ export default {
         // this.currIdx = this.journalData.lyrics.length - 1
         
               // 加载手帐数据
-        
+        this.currIdx = this.journalData.currIdx
         // 如果没找到，使用示例数据
         if (!this.journalData) {
           this.journalData = this.sampleData
@@ -1658,7 +1659,7 @@ async generateEditedPoster() {
   /* height:95%; */
   max-width: 100%;
   max-height: 100%;
-  margin-left: 20px;
+  /* margin-left: 20px; */
   object-fit: cover;
   display: block;
   transition: transform 0.3s ease;
@@ -2268,6 +2269,9 @@ async generateEditedPoster() {
   right: 0;
   bottom: 0;
   background: #f8f9fa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background-image: 
     radial-gradient(circle, #e9ecef 1px, transparent 1px);
   background-size: 20px 20px;
