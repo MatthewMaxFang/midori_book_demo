@@ -655,7 +655,7 @@ export default {
   backdrop-filter: blur(20px);
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   display: flex;
-  padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
   z-index: 1000;
 }
 
@@ -665,13 +665,16 @@ export default {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 8px 16px;
+  padding: 8px 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   color: #666;
   outline: none; /* 移除蓝色选择框 */
   border: none; /* 移除边框 */
   background: none; /* 移除背景 */
+  min-height: 48px; /* 固定最小高度 */
+  box-sizing: border-box; /* 确保padding不影响总高度 */
+  justify-content: center; /* 垂直居中 */
 }
 
 .tab-item.active {

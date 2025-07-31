@@ -45,7 +45,7 @@
         <div class="poster-container" @wheel="handleDetailPosterWheel">
           <div class="poster-wrapper">
             <img 
-              :src=journalData?.editedPosterPath || 
+              :src="getCurrentPosterImage()" 
               :alt="journalData.songTitle"
               class="poster-image"
               :style="{
@@ -58,6 +58,47 @@
               @touchstart="startDetailPosterDrag"
               @dragstart.prevent
             />
+            
+            <!-- 只有在没有编辑后图片时才显示悬浮元素 -->
+            <div 
+              v-if="!journalData.editedPosterPath"
+              v-for="element in (journalData.editElements || [])" 
+              :key="element.id"
+              class="detail-edit-element"
+              :style="{
+                left: element.x + 'px',
+                top: element.y + 'px',
+                transform: `scale(${element.scale || 1}) rotate(${element.rotation || 0}deg)`,
+                color: element.color || '#fff',
+                fontSize: element.fontSize + 'px',
+                fontFamily: element.fontFamily || 'inherit',
+                textShadow: element.type === 'text' ? '2px 2px 4px rgba(0,0,0,0.8)' : 'none'
+              }"
+            >
+              <div v-if="element.type === 'text'" class="detail-text-element">
+                {{ element.content }}
+        </div>
+              <div v-if="element.type === 'sticker'" class="detail-sticker-element">
+                <img 
+                  :src="element.content" 
+                  :alt="'贴纸'"
+                  class="detail-sticker-image"
+                  :style="{
+                    width: (element.width || 80) + 'px',
+                    height: (element.height || 80) + 'px'
+                  }"
+                />
+        </div>
+      </div>
+            
+            <!-- 海报信息叠加层 - 只在原始状态且没有编辑元素时显示 -->
+            <div class="poster-overlay" v-if="!journalData.editedPosterPath && (!journalData.editElements || journalData.editElements.length === 0)">
+              <div class="poster-info">
+                <h2 class="poster-title">{{ journalData.songTitle }}</h2>
+                <p class="poster-artist">{{ journalData.artist }}</p>
+                <div class="poster-date">{{ journalData.collectedAt }}</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -150,7 +191,7 @@
           </div>
           
           <!-- 选中状态的控制点 -->
-          <div v-if="selectedElement === element.id && !isScreen" class="element-controls">
+          <div v-if="selectedElement === element.id" class="element-controls">
             <!-- 缩放控制点 -->
             <div class="control-point resize-point" 
                  @mousedown.stop="startResize(element.id, $event)"
@@ -404,7 +445,6 @@
 </template>
 
 <script>
-import html2canvas from 'html2canvas';
 export default {
   name: 'JournalDetailPage',
   data() {
@@ -412,8 +452,6 @@ export default {
       recordId: null,
       journalData: null,
       isEditMode: false,
-      isScreen:false,
-      initImg: '../assets/image.png',
       
       // 其他用户手帐相关
       isOthersJournal: false,
@@ -788,7 +826,6 @@ export default {
     
     enterEditMode() {
       this.isEditMode = true
-      this.isScreen = false
       this.editData = { ...this.journalData }
       
       // 加载之前保存的编辑元素
@@ -810,9 +847,7 @@ export default {
     },
     
     async saveEditedJournal() {
-      this.isScreen = true
-      setTimeout(async ()=>{
-try {
+      try {
         // 生成编辑后的海报路径
         const editedPosterPath = await this.generateEditedPoster();
         
@@ -857,87 +892,219 @@ try {
         console.error('保存失败:', error)
         this.showToast('保存失败，请重试')
       }
-      },100)
-      
     },
 
     // 生成编辑后的海报（Canvas合成并保存为base64）
-    async  compressImageAndGetBase64(canvas, quality = 0.8, maxWidth = 1200, maxHeight = 1200) {
-  // 1. 计算压缩后的尺寸（保持比例）
-  let width = canvas.width;
-  let height = canvas.height;
-  
-  // 如果图片尺寸超过最大限制，按比例缩小
-  if (width > maxWidth || height > maxHeight) {
-    const ratio = Math.min(maxWidth / width, maxHeight / height);
-    width = width * ratio;
-    height = height * ratio;
-  }
-  
-  // 2. 创建临时canvas用于压缩
-  const tempCanvas = document.createElement('canvas');
-  const ctx = tempCanvas.getContext('2d');
-  
-  // 设置压缩后的尺寸
-  tempCanvas.width = width;
-  tempCanvas.height = height;
-  
-  // 3. 绘制图片到临时canvas（实现压缩）
-  ctx.drawImage(canvas, 0, 0, width, height);
-  
-  // 4. 转换为base64，通过quality参数控制质量（0-1之间，值越小质量越低）
-  // 注意：png格式不支持quality参数，会被忽略
-  const base64Data = tempCanvas.toDataURL('image/jpeg', quality);
-  
-  return {
-    base64Data,
-    width,
-    height,
-    originalSize: canvas.toDataURL().length,
-    compressedSize: base64Data.length,
-    compressionRatio: (base64Data.length / canvas.toDataURL().length).toFixed(2)
-  };
-},
+    async generateEditedPoster() {
+      try {
+        const timestamp = Date.now();
+        const editedPath = `/src/assets/midori/edited/journal_${this.editData.id}_${timestamp}.png`;
+        
+        // 获取编辑画布的实际尺寸作为参考
+        const editCanvas = this.$refs.editCanvas;
+        if (!editCanvas) {
+          throw new Error('编辑画布未找到');
+        }
+        
+        const canvasRect = editCanvas.getBoundingClientRect();
+        const editCanvasWidth = canvasRect.width;
+        const editCanvasHeight = canvasRect.height;
+        
+        // 创建高分辨率Canvas，但保持比例
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 设置Canvas尺寸，保持与编辑区域相同的宽高比
+        const scale = 2; // 2倍分辨率提升画质
+        canvas.width = editCanvasWidth * scale;
+        canvas.height = editCanvasHeight * scale;
+        
+        // 加载原始海报图片
+        const originalImage = new Image();
+        originalImage.crossOrigin = 'anonymous';
+        
+        const dataUrl = await new Promise((resolve, reject) => {
+          originalImage.onload = async () => {
+            try {
+              // 不绘制背景，保持透明
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              
+              // 计算海报在编辑画布中的实际显示尺寸
+              const imgAspectRatio = originalImage.width / originalImage.height;
+              const canvasAspectRatio = canvas.width / canvas.height;
+              
+              let baseWidth, baseHeight, baseX, baseY;
+              
+              if (imgAspectRatio > canvasAspectRatio) {
+                // 图片更宽，以画布宽度为准
+                baseWidth = canvas.width;
+                baseHeight = baseWidth / imgAspectRatio;
+                baseX = 0;
+                baseY = (canvas.height - baseHeight) / 2;
+              } else {
+                // 图片更高，以画布高度为准
+                baseHeight = canvas.height;
+                baseWidth = baseHeight * imgAspectRatio;
+                baseX = (canvas.width - baseWidth) / 2;
+                baseY = 0;
+              }
+              
+              // 先绘制海报，应用用户的缩放和偏移
+              ctx.save();
+              // 移动到基准位置
+              ctx.translate(baseX, baseY);
+              // 模拟transform-origin: center center的海报变换
+              ctx.translate(baseWidth / 2, baseHeight / 2);
+              ctx.scale(this.posterScale, this.posterScale);
+              ctx.translate(this.posterOffsetX, this.posterOffsetY);
+              ctx.translate(-baseWidth / 2, -baseHeight / 2);
+              // 绘制海报
+              ctx.drawImage(originalImage, 0, 0, baseWidth, baseHeight);
+              ctx.restore();
+              
+              // 绘制所有编辑元素，使用相同的变换但元素有自己的坐标
+              await this.drawEditElementsToCanvas(ctx, scale, baseX, baseY, baseWidth, baseHeight);
+              
+              // 转换为PNG保持透明度
+              const dataUrl = canvas.toDataURL('image/png');
+              resolve(dataUrl);
+            } catch (error) {
+              reject(error);
+            }
+          };
+          originalImage.onerror = reject;
+          
+          // 加载原始海报图片，确保使用原始模板
+          const posterSrc = this.getPosterByIndex(this.editData.id);
+          originalImage.src = posterSrc;
+        });
+        
+        // 将base64数据保存到localStorage（模拟文件保存）
+        const editedImages = JSON.parse(localStorage.getItem('editedImages') || '{}');
+        editedImages[editedPath] = dataUrl;
+        localStorage.setItem('editedImages', JSON.stringify(editedImages));
+        
+        // 生成缩略图（用于列表显示）
+        const thumbnailCanvas = document.createElement('canvas');
+        const thumbnailCtx = thumbnailCanvas.getContext('2d');
+        
+        // 保持原图的宽高比
+        const thumbnailScale = 0.3; // 缩略图比例
+        thumbnailCanvas.width = canvas.width * thumbnailScale;
+        thumbnailCanvas.height = canvas.height * thumbnailScale;
+        
+        // 将高分辨率图片缩放到缩略图尺寸
+        const tempImg = new Image();
+        await new Promise((resolve) => {
+          tempImg.onload = () => {
+            thumbnailCtx.drawImage(tempImg, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
+            const thumbnailDataUrl = thumbnailCanvas.toDataURL('image/png');
+            
+            // 保存缩略图
+            const thumbnailPath = editedPath.replace('.png', '_thumb.png');
+            editedImages[thumbnailPath] = thumbnailDataUrl;
+            localStorage.setItem('editedImages', JSON.stringify(editedImages));
+            resolve();
+          };
+          tempImg.src = dataUrl;
+        });
+        
+        // Canvas合成完成，生成编辑后的海报
+        
+        // 注意：由于前端限制，图片以base64格式保存在localStorage中
+        // 在生产环境中，应该发送到后端服务器保存实际文件
+        
+        return editedPath;
+      } catch (error) {
+        console.error('保存海报失败:', error);
+        return null;
+      }
+    },
 
-// 在你的generateEditedPoster方法中使用
-async generateEditedPoster() {
-  try {
-    const timestamp = Date.now();
-    
-    const editCanvas = this.$refs.editCanvas;
-    if (!editCanvas) {
-      throw new Error('编辑画布未找到');
-    }
-    
-    // 原始画布截图
-    const canvas = await html2canvas(editCanvas, {
-      useCORS: true,
-      scale: 2,
-      backgroundColor: '#ffffff',
-    });
-    
-    // 压缩图片（根据需要调整参数）
-    // 质量0.7，最大宽度1000px，最大高度1000px
-    const compressedResult = await this.compressImageAndGetBase64(canvas, 0.7, 1000, 1000);
-    
-    console.log(`压缩前大小: ${compressedResult.originalSize} 字符`);
-    console.log(`压缩后大小: ${compressedResult.compressedSize} 字符`);
-    console.log(`压缩比例: ${compressedResult.compressionRatio}`);
-    
-    return compressedResult.base64Data
-    return {
-      timestamp,
-      base64Data: compressedResult.base64Data,
-      filename: `${timestamp}_my_journal.jpg`, // 注意这里改为jpg格式
-      width: compressedResult.width,
-      height: compressedResult.height
-    };
-  } catch (error) {
-    console.error('生成压缩后的base64海报失败:', error);
-    return null;
-  }
-},
-      
+    // 在Canvas上绘制编辑元素
+    async drawEditElementsToCanvas(ctx, scale, baseX, baseY, baseWidth, baseHeight) {
+      for (const element of this.editElements) {
+        ctx.save();
+        
+        // 完全模拟CSS变换：transform-origin: center center; transform: scale(posterScale) translate(posterOffsetX px, posterOffsetY px)
+        // CSS语义：围绕中心点进行scale，然后translate
+        
+        // 1. 移动到画布基准位置  
+        ctx.translate(baseX, baseY);
+        
+        // 2. 模拟transform-origin: center center
+        // 先移动到容器中心
+        ctx.translate(baseWidth / 2, baseHeight / 2);
+        
+        // 3. 应用变换（围绕中心点）
+        ctx.scale(this.posterScale, this.posterScale);
+        ctx.translate(this.posterOffsetX, this.posterOffsetY);
+        
+        // 4. 移回到左上角坐标系
+        ctx.translate(-baseWidth / 2, -baseHeight / 2);
+        
+        // 5. 应用元素自己的位置和变换
+        ctx.translate(element.x, element.y);
+        ctx.scale(element.scale || 1, element.scale || 1);
+        ctx.rotate((element.rotation || 0) * Math.PI / 180);
+        ctx.globalAlpha = element.opacity || 1;
+        
+        if (element.type === 'text') {
+          // 绘制文本元素
+          ctx.fillStyle = element.color || '#ffffff';
+          const fontSize = (element.fontSize || 16);
+          ctx.font = `${fontSize}px ${element.fontFamily || 'PingFang SC, -apple-system, BlinkMacSystemFont, sans-serif'}`;
+          
+          // 添加文本阴影
+          ctx.shadowColor = 'rgba(0,0,0,0.8)';
+          ctx.shadowBlur = 4;
+          ctx.shadowOffsetX = 2;
+          ctx.shadowOffsetY = 2;
+          
+          ctx.fillText(element.content, 0, 0);
+        } else if (element.type === 'sticker') {
+          // 绘制贴纸元素
+          await new Promise((resolve) => {
+            const stickerImage = new Image();
+            stickerImage.crossOrigin = 'anonymous';
+            stickerImage.onload = () => {
+              const width = (element.width || 80);
+              const height = (element.height || 80);
+              ctx.drawImage(
+                stickerImage, 
+                -width / 2, 
+                -height / 2,
+                width, 
+                height
+              );
+              resolve();
+            };
+            stickerImage.onerror = resolve; // 如果加载失败就跳过
+            stickerImage.src = element.content;
+          });
+        }
+        
+        ctx.restore();
+      }
+    },
+
+    // 下载图片文件到用户本地
+    downloadImageFile(dataUrl, filename) {
+      try {
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = dataUrl;
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // 图片已下载到用户的下载文件夹
+      } catch (error) {
+        console.error('下载图片失败:', error);
+      }
+    },
     
     // 工具选择
     selectTool(tool) {
@@ -2221,9 +2388,6 @@ async generateEditedPoster() {
   background-size: 20px 20px;
   z-index: 1;
   overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .canvas-poster-image {

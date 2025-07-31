@@ -822,6 +822,11 @@ export default {
   cursor: pointer;
   transition: all 0.2s ease;
   color: #8b7355;
+  outline: none; /* 移除蓝色选择框 */
+  border: none; /* 移除边框 */
+  background: none; /* 移除背景 */
+  min-height: 48px; /* 固定最小高度 */
+  box-sizing: border-box; /* 确保padding不影响总高度 */
 }
 
 .tab-item.active {
