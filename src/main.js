@@ -7,6 +7,7 @@ import PlayerPage from './components/PlayerPage.vue'
 import CommentPage from './components/CommentPage.vue'
 import LyricBookPage from './components/LyricBookPage.vue'
 import JournalDetailPage from './components/JournalDetailPage.vue'
+import JournalZonePage from './components/JournalZonePage.vue'
 import ProfilePage from './components/ProfilePage.vue'
 
 const routes = [
@@ -15,7 +16,8 @@ const routes = [
   { path: '/player', component: PlayerPage },
   { path: '/comment', component: CommentPage },
   { path: '/lyricbook', component: LyricBookPage },
-  { path: '/journal-detail', component: JournalDetailPage }
+  { path: '/journal-detail', component: JournalDetailPage },
+  { path: '/journal-zone', component: JournalZonePage }
 ]
 
 const router = createRouter({

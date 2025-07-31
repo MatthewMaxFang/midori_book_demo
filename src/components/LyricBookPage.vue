@@ -93,6 +93,29 @@
         </div>
       </div>
     </div>
+
+    <!-- 底部Tab栏 -->
+    <div class="bottom-tabs">
+      <div class="tab-item" @click="goToJournalZone">
+        <div class="tab-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="tab-label">手帐专区</span>
+      </div>
+      <div class="tab-item active">
+        <div class="tab-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="tab-label">我的</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -176,6 +199,10 @@ export default {
     
     goToPlayer() {
       this.$router.push('/player')
+    },
+
+    goToJournalZone() {
+      this.$router.push('/journal-zone')
     },
     
     handleCardClick(record) {
@@ -772,5 +799,62 @@ export default {
   .empty-desc {
     font-size: 14px;
   }
+}
+
+/* 底部Tab栏样式 */
+.bottom-tabs {
+  display: flex;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+  position: relative;
+  z-index: 10;
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #8b7355;
+}
+
+.tab-item.active {
+  color: #d4b896;
+}
+
+.tab-item:hover {
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 12px;
+}
+
+.tab-icon {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.5;
+}
+
+.tab-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.tab-item.active .tab-label {
+  font-weight: 600;
 }
 </style>
