@@ -823,7 +823,7 @@ export default {
   content: '';
   position: absolute;
   bottom: 0px;
-  left: -5px;
+  left: 0px;
   width: calc(100% + 10px);
   height: 3px;
   background: linear-gradient(to right,
