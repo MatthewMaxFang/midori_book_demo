@@ -48,7 +48,7 @@
             <div class="card-front">
               <div class="poster-background">
                 <img 
-                  :src=this.cover.cover[record.currIdx]
+                  :src=this.cover[record.currIdx]
                   :alt="record.songTitle"
                   class="poster-image"
                 />
@@ -97,7 +97,14 @@
 </template>
 
 <script>
-import cover from '../assets/img'
+import cover_common from '../assets/midori/cover_common.jpg'
+import cover_1 from '../assets/midori/cover_1.jpg'
+import cover_2 from '../assets/midori/cover_2.jpg'
+import cover_3 from '../assets/midori/cover_3.jpg'
+import cover_4 from '../assets/midori/cover_4.png'
+const cover = 
+  [cover_common,cover_1,cover_3,cover_4,cover_2]
+
 export default {
   name: 'LyricBookPage',
   data() {

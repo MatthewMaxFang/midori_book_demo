@@ -60,7 +60,7 @@
         <!-- 其他模板选项 -->
         <div class="template-options">
           <div class="template-item template-option ai-template-item"
-            :class="{ 'has-generated': hasAIGenerated, 'active': currentTemplateIndex === -1 }"
+            :class="{ 'has-generated': hasAIGenerated, 'active': currentTemplateIndex === 4 }"
             @click="handleAITemplateClick" @mouseenter="showRegenerateBtn = true"
             @mouseleave="showRegenerateBtn = false">
             <!-- 未生成时显示AI图标和文字 -->
@@ -78,7 +78,7 @@
             </template>
           </div>
           <div v-for="(template, index) in templates" :key="index" class="template-option"
-            :class="{ active: currentTemplateIndex === index && currentTemplateIndex !== -1 }"
+            :class="{ active: currentTemplateIndex === index && currentTemplateIndex !== 4 }"
             @click="selectTemplate(index)">
             <img :src="template.thumbnail" :alt="template.name" class="template-thumbnail">
           </div>
@@ -202,22 +202,6 @@ export default {
           }
         },
         {
-          name: '清新简约',
-          background: '/src/assets/midori/cover_2.jpg',
-          thumbnail: '/src/assets/midori/cover_2.jpg',
-          textStyle: {
-            position: 'absolute',
-            top: '25%',
-            left: '15%',
-            right: '15%',
-            fontSize: '14px',
-            lineHeight: '1.6',
-            color: '#2C3E50',
-            fontFamily: '微软雅黑, Microsoft YaHei, sans-serif',
-            textAlign: 'center'
-          }
-        },
-        {
           name: '文艺风格',
           background: '/src/assets/midori/cover_3.jpg',
           thumbnail: '/src/assets/midori/cover_3.jpg',
@@ -258,8 +242,8 @@ export default {
      * @returns {Object} 当前模板对象
      */
     currentTemplate() {
-      // 如果当前选中的是AI模板（索引为-1），返回AI模板
-      if (this.currentTemplateIndex === -1 && this.currentAITemplate) {
+      // 如果当前选中的是AI模板（索引为4），返回AI模板
+      if (this.currentTemplateIndex === 4 && this.currentAITemplate) {
         return this.currentAITemplate
       }
       return this.templates[this.currentTemplateIndex] || this.templates[0]
@@ -381,7 +365,7 @@ export default {
       // 直接将AI模板设置为当前模板，不添加到templates数组
       this.currentAITemplate = aiTemplate
       // 设置一个特殊的索引值来标识当前使用的是AI模板
-      this.currentTemplateIndex = -1
+      this.currentTemplateIndex = 4
     },
 
     /**
@@ -402,10 +386,11 @@ export default {
 
       // 模拟5秒生成时间
       setTimeout(() => {
+        this.currentTemplateIndex = 4
         this.showGeneratingModal = false
         this.hasAIGenerated = true
         this.useAITemplate()
-      }, 5000)
+      }, 2000)
     },
 
 

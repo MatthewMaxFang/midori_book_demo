@@ -439,7 +439,14 @@
 
 <script>
 import html2canvas from 'html2canvas';
-import cover from '../assets/img'
+import cover_common from '../assets/midori/cover_common.jpg'
+import cover_1 from '../assets/midori/cover_1.jpg'
+import cover_2 from '../assets/midori/cover_2.jpg'
+import cover_3 from '../assets/midori/cover_3.jpg'
+import cover_4 from '../assets/midori/cover_4.png'
+const cover = 
+  [cover_common,cover_1,cover_3,cover_4,cover_2]
+
 export default {
   name: 'JournalDetailPage',
   data() {
@@ -457,7 +464,7 @@ export default {
       isLiked: false,
       isScreen: false,
       currIdx:0,
-      cover:cover.cover,
+      cover:cover,
       // 编辑相关数据
       editData: null,
       editElements: [],
@@ -477,7 +484,7 @@ export default {
         '/src/assets/stickers/sticker_6.png',
         '/src/assets/stickers/sticker_7.png'
       ],
-      cover:cover.cover,
+      cover:cover,
       availableColors: ['#000000', '#ffffff', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd', '#98d8c8', '#f7dc6f', '#bb8fce'],
       availableFonts: [
         { name: '默认字体', value: 'inherit' },
@@ -597,6 +604,7 @@ export default {
   
   methods: {
     loadJournalData() {
+      // console.log(this.cover)
       if (this.isOthersJournal) {
         // 处理其他用户的手帐数据
         this.loadOthersJournalData()
@@ -950,7 +958,6 @@ export default {
 // 在你的generateEditedPoster方法中使用
 async generateEditedPoster() {
   try {
-    const timestamp = Date.now();
     
     const editCanvas = this.$refs.editCanvas;
     if (!editCanvas) {
@@ -964,23 +971,16 @@ async generateEditedPoster() {
       backgroundColor: '#ffffff',
     });
     
-
-    // 压缩图片（根据需要调整参数）
-    // 质量0.7，最大宽度1000px，最大高度1000px
-    const compressedResult = await this.compressImageAndGetBase64(canvas, 0.7, 1000, 1000);
+    console.log(canvas)
+    return canvas.toDataURL();
+    console.log(canvas)
+    const compressedResult = await this.compressImageAndGetBase64(canvas, 0.7);
     
     console.log(`压缩前大小: ${compressedResult.originalSize} 字符`);
     console.log(`压缩后大小: ${compressedResult.compressedSize} 字符`);
     console.log(`压缩比例: ${compressedResult.compressionRatio}`);
     
     return compressedResult.base64Data
-    return {
-      timestamp,
-      base64Data: compressedResult.base64Data,
-      filename: `${timestamp}_my_journal.jpg`, // 注意这里改为jpg格式
-      width: compressedResult.width,
-      height: compressedResult.height
-    };
   } catch (error) {
     console.error('生成压缩后的base64海报失败:', error);
     return null;
@@ -1655,11 +1655,8 @@ async generateEditedPoster() {
 }
 
 .poster-image {
-  /* width:95%; */
-  /* height:95%; */
   max-width: 100%;
   max-height: 100%;
-  /* margin-left: 20px; */
   object-fit: cover;
   display: block;
   transition: transform 0.3s ease;
@@ -1850,6 +1847,7 @@ async generateEditedPoster() {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background-color: #fff;
 }
 
 /* 超紧凑工具栏 */
@@ -2256,6 +2254,8 @@ async generateEditedPoster() {
 /* 编辑画布 */
 .edit-canvas {
   flex: 1;
+  width: 80%;
+  margin: 0 auto;
   position: relative;
   overflow: hidden;
   cursor: crosshair;
@@ -2268,12 +2268,9 @@ async generateEditedPoster() {
   left: 0;
   right: 0;
   bottom: 0;
-  background: #f8f9fa;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-image: 
-    radial-gradient(circle, #e9ecef 1px, transparent 1px);
   background-size: 20px 20px;
   z-index: 1;
   overflow: hidden;
