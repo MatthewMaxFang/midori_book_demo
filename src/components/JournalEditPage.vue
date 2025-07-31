@@ -158,6 +158,7 @@ export default {
       // 歌曲信息
       songTitle: '',
       artist: '',
+      mood: '',
       // AI模板相关状态
       showAIModal: false,
       showGeneratingModal: false,
@@ -261,7 +262,7 @@ export default {
      * 从路由查询参数中获取歌词数据
      */
     initializeData() {
-      const { lyrics, songTitle, artist } = this.$route.query
+      const { lyrics, songTitle, artist, mood } = this.$route.query
 
       if (lyrics) {
         try {
@@ -274,6 +275,7 @@ export default {
 
       this.songTitle = songTitle || '未知歌曲'
       this.artist = artist || '未知歌手'
+      this.mood = mood || '未知心情'
     },
 
     /**
@@ -304,7 +306,8 @@ export default {
         template: this.currentTemplate,
         createdAt: new Date().toLocaleDateString('zh-CN'),
         timestamp: Date.now(),
-        currIdx: this.currentTemplateIndex
+        currIdx: this.currentTemplateIndex,
+        mood: this.mood
       }
 
       // 保存到本地存储

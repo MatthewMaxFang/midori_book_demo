@@ -348,7 +348,7 @@ export default {
       // 存储到本地存储
       const existingRecords = JSON.parse(localStorage.getItem('lyricMoodRecords') || '[]')
       existingRecords.unshift(moodRecord)
-      localStorage.setItem('lyricMoodRecords', JSON.stringify(existingRecords))
+      // localStorage.setItem('lyricMoodRecords', JSON.stringify(existingRecords))
 
       // 添加到收藏
       this.selectedLyrics.forEach(index => {
@@ -366,7 +366,8 @@ export default {
         query: {
           lyrics: JSON.stringify(lyricsData),
           songTitle: '我怀念的',
-          artist: '孙燕姿'
+          artist: '孙燕姿',
+          mood: finalMoodText
         }
       })
     },
