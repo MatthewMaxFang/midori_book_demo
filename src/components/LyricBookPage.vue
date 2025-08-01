@@ -137,7 +137,7 @@ export default {
       
       // 输出每个记录的editedPosterPath状态
       this.moodRecords.forEach(record => {
-        if (record.editedPosterPath) {
+        if (record?.editedPosterPath) {
           console.log(`记录 ${record.id} 有编辑图片:`, record.editedPosterPath);
         }
       });
@@ -194,7 +194,7 @@ export default {
       console.log(record)
       
       // 如果有编辑后的海报，优先使用缩略图
-      if (record.editedPosterPath) {
+      if (record?.editedPosterPath) {
         return record.editedPosterPath
         // const editedImages = JSON.parse(localStorage.getItem('editedImages') || '{}');
         // // 支持jpg和png格式的缩略图
