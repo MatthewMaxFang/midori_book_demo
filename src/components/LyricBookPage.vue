@@ -218,7 +218,7 @@ export default {
       }
       
       // 如果是示例数据，使用对应的图片
-      if (exampleImageMap[record.currIdx]) {
+      if (exampleImageMap[record?.currIdx]) {
         return exampleImageMap[record.currIdx]
       }
       
