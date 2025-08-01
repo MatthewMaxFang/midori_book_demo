@@ -439,13 +439,14 @@
 
 <script>
 import html2canvas from 'html2canvas';
-import cover_common from '../assets/midori/cover_common.jpg'
 import cover_1 from '../assets/midori/cover_1.jpg'
 import cover_2 from '../assets/midori/cover_2.jpg'
 import cover_3 from '../assets/midori/cover_3.jpg'
 import cover_4 from '../assets/midori/cover_4.png'
+import cover_5 from '../assets/midori/cover_5.png'
+
 const cover = 
-  [cover_common,cover_1,cover_3,cover_4,cover_2]
+  [cover_5,cover_1,cover_3,cover_4,cover_2]
 
 export default {
   name: 'JournalDetailPage',

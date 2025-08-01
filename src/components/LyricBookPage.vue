@@ -48,7 +48,7 @@
             <div class="card-front">
               <div class="poster-background">
                 <img 
-                  :src=this.cover[record.currIdx]
+                  :src=getPosterImage(record.currIdx)
                   :alt="record.songTitle"
                   class="poster-image"
                 />
@@ -97,13 +97,14 @@
 </template>
 
 <script>
-import cover_common from '../assets/midori/cover_common.jpg'
 import cover_1 from '../assets/midori/cover_1.jpg'
 import cover_2 from '../assets/midori/cover_2.jpg'
 import cover_3 from '../assets/midori/cover_3.jpg'
 import cover_4 from '../assets/midori/cover_4.png'
+import cover_5 from '../assets/midori/cover_5.png'
+
 const cover = 
-  [cover_common,cover_1,cover_3,cover_4,cover_2]
+  [cover_5,cover_1,cover_3,cover_4,cover_2]
 
 export default {
   name: 'LyricBookPage',
@@ -190,31 +191,35 @@ export default {
 
     getPosterImage(index) {
       const record = this.moodRecords[index]
+      console.log(record)
       
       // 如果有编辑后的海报，优先使用缩略图
       if (record.editedPosterPath) {
-        const editedImages = JSON.parse(localStorage.getItem('editedImages') || '{}');
-        // 支持jpg和png格式的缩略图
-        const thumbnailPath = record.editedPosterPath.replace(/\.(jpg|png)$/, '_thumb.$1');
-        if (editedImages[thumbnailPath]) {
-          return editedImages[thumbnailPath];
-        }
-        // 如果没有缩略图，使用原图
-        if (editedImages[record.editedPosterPath]) {
-          return editedImages[record.editedPosterPath];
-        }
+        return record.editedPosterPath
+        // const editedImages = JSON.parse(localStorage.getItem('editedImages') || '{}');
+        // // 支持jpg和png格式的缩略图
+        // const thumbnailPath = record.editedPosterPath.replace(/\.(jpg|png)$/, '_thumb.$1');
+        // if (editedImages[thumbnailPath]) {
+        //   return editedImages[thumbnailPath];
+        // }
+        // // 如果没有缩略图，使用原图
+        // if (editedImages[record.editedPosterPath]) {
+        //   return editedImages[record.editedPosterPath];
+        // }
       }
       
       // 示例数据的固定ID，使用对应的图片
       const exampleImageMap = {
-        1640000000000: '/src/assets/midori/cover_1.jpg',
-        1640100000000: '/src/assets/midori/cover_2.jpg', 
-        1640200000000: '/src/assets/midori/cover_3.jpg'
+        0: '/src/assets/midori/cover_5.png',
+        1: '/src/assets/midori/cover_1.jpg', 
+        2: '/src/assets/midori/cover_3.jpg',
+        3: '/src/assets/midori/cover_4.png',
+        4: '/src/assets/midori/cover_2.jpg',
       }
       
       // 如果是示例数据，使用对应的图片
-      if (exampleImageMap[record.id]) {
-        return exampleImageMap[record.id]
+      if (exampleImageMap[record.currIdx]) {
+        return exampleImageMap[record.currIdx]
       }
       
       // 新创建的记录使用默认模板
